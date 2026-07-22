@@ -53,3 +53,17 @@ def test_get_sessionmaker(mock_settings):
     engine = database.get_engine()
     SessionLocal = database.get_sessionmaker(engine)
     assert isinstance(SessionLocal, sessionmaker)
+
+def test_get_gb_yield_working_session(mock_settings):
+    database = reload_database_module()
+
+    gen = database.get_db()
+    db = next(gen)
+
+    assert isinstance(db,Session)
+
+    with patch.object(db, "close") as mock_close:
+        with pytest.raises(StopIteration):
+            next(gen)
+        mock_close.assert_called_once()
+    
